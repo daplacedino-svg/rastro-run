@@ -1,0 +1,22 @@
+{
+  "name": "rastro-run",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "dev:https": "vite --mode https"
+  },
+  "dependencies": {
+    "@garmin/fitsdk": "^21.217.0",
+    "maplibre-gl": "^6.12.0",
+    "mediabunny": "^1.61.3"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-basic-ssl": "^2.3.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.2"
+  }
+}

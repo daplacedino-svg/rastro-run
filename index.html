@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0e121c" />
+    <meta name="description" content="Transforme sua corrida em um vídeo de sobrevoo para Reels e Stories. Suba o GPX, FIT ou TCX e baixe o MP4." />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>rastro.run — sua corrida em vídeo</title>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="logo" href="/" aria-label="rastro.run">rastro<span>.run</span></a>
+    </header>
+
+    <main class="app">
+      <!-- 1. Upload -->
+      <section id="step-upload" class="step">
+        <h1>Sua corrida virando vídeo</h1>
+        <p class="lead">Suba o arquivo do relógio e baixe um vídeo vertical de 25 segundos para Reels e Stories.</p>
+
+        <label class="dropzone" id="dropzone">
+          <input id="file-input" type="file" accept=".gpx,.fit,.tcx,application/gpx+xml,application/vnd.garmin.tcx+xml" hidden />
+          <svg viewBox="0 0 24 24" width="32" height="32" aria-hidden="true"><path fill="currentColor" d="M11 16V7.8l-2.6 2.6L7 9l5-5 5 5-1.4 1.4L13 7.8V16h-2Zm-6 4q-.8 0-1.4-.6T3 18v-3h2v3h14v-3h2v3q0 .8-.6 1.4T19 20H5Z"/></svg>
+          <strong>Escolher arquivo</strong>
+          <span>GPX, FIT ou TCX</span>
+        </label>
+        <button id="sample-btn" class="link-btn" type="button">ou testar com o exemplo</button>
+        <p id="upload-error" class="error" role="alert" hidden></p>
+        <p class="privacy">Tudo acontece no seu aparelho. O arquivo não é enviado para nenhum servidor.</p>
+      </section>
+
+      <!-- 2. Prévia / geração / resultado -->
+      <section id="step-studio" class="step" hidden>
+        <div class="stage-wrap">
+          <div class="stage">
+            <canvas id="preview-canvas" width="1080" height="1920" aria-label="Prévia do vídeo"></canvas>
+            <video id="result-video" playsinline controls loop hidden></video>
+
+            <div id="busy" class="busy" hidden>
+              <div class="busy-card">
+                <div id="stopwatch" class="stopwatch">00:00,0</div>
+                <div id="busy-label" class="busy-label">Preparando…</div>
+                <div class="bar"><div id="busy-bar"></div></div>
+                <div id="busy-detail" class="busy-detail"></div>
+                <button id="cancel-btn" class="ghost-btn" type="button">Cancelar</button>
+              </div>
+            </div>
+            <div id="loading" class="busy" hidden>
+              <div class="busy-card"><div class="busy-label">Carregando mapa…</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="preview-controls" class="controls">
+          <button id="play-btn" class="round-btn" type="button" aria-label="Reproduzir">
+            <svg id="icon-play" viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M8 5.5v13l10.5-6.5L8 5.5Z"/></svg>
+            <svg id="icon-pause" viewBox="0 0 24 24" width="22" height="22" hidden><path fill="currentColor" d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+          </button>
+          <input id="scrubber" type="range" min="0" max="749" value="0" aria-label="Posição na prévia" />
+          <span id="time-label" class="time">0,0 s</span>
+        </div>
+
+        <p id="studio-error" class="error" role="alert" hidden></p>
+
+        <div id="actions" class="actions">
+          <button id="export-btn" class="primary-btn" type="button">Gerar vídeo</button>
+        </div>
+
+        <div id="result" class="result" hidden>
+          <div class="actions">
+            <a id="download-btn" class="primary-btn" download="rastro-run.mp4">Baixar vídeo</a>
+            <button id="share-btn" class="ghost-btn" type="button" hidden>Compartilhar</button>
+          </div>
+          <dl id="result-stats" class="stats"></dl>
+          <button id="back-btn" class="link-btn" type="button">Voltar para a prévia</button>
+        </div>
+
+        <label class="field">
+          <span>Câmera <em>(em teste)</em></span>
+          <select id="camera-select"></select>
+        </label>
+
+        <dl id="track-info" class="track-info"></dl>
+
+        <button id="new-file-btn" class="link-btn" type="button">Usar outro arquivo</button>
+        <p id="attribution" class="attribution"></p>
+      </section>
+    </main>
+
+    <!-- O mapa é renderizado aqui, fora da tela, em 540×960 CSS px × 2 = 1080×1920. -->
+    <div id="map-host" aria-hidden="true"></div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
