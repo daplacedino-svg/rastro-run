@@ -22,6 +22,13 @@ npm run dev:https
 Abra no celular o endereço `https://192.168.x.x:5173` que aparecer como **Network** e aceite o aviso
 de certificado (é autoassinado). Outra opção é usar a URL publicada no Cloudflare (já tem HTTPS).
 
+## Páginas
+
+- `index.html`: o app (upload → prévia → vídeo).
+- `como-exportar.html`: passo a passo para baixar o GPX/FIT/TCX no celular (Strava, Garmin, Coros,
+  Suunto, Polar, Apple Watch). No ar, fica em `/como-exportar`, e dá para abrir direto num app com
+  âncora: `/como-exportar#garmin`. Os menus dos apps mudam com o tempo, então revise de vez em quando.
+
 ## Como o vídeo é gerado
 
 1. **Trajeto** (`src/parsers`, `src/track`): lê o arquivo, remove pontos parados e suaviza o GPS.

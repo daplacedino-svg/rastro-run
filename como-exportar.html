@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0e121c" />
+    <meta name="description" content="Passo a passo para baixar o arquivo GPX, FIT ou TCX da sua corrida no Strava, Garmin, Coros, Suunto, Polar e Apple Watch, direto pelo celular." />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>Como pegar o arquivo da sua corrida — rastro.run</title>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="logo" href="/" aria-label="rastro.run — início">rastro<span>.run</span></a>
+    </header>
+
+    <main class="app help">
+      <h1>Como pegar o arquivo da sua corrida</h1>
+      <p class="lead">
+        O rastro.run aceita arquivos <strong>GPX</strong>, <strong>FIT</strong> ou <strong>TCX</strong>, e qualquer um deles serve.
+        Escolha o app que você usa:
+      </p>
+
+      <p class="tip">
+        <strong>Dica:</strong> se o seu relógio envia as corridas para o Strava (Garmin, Coros, Apple Watch, Amazfit…),
+        o caminho do Strava funciona para qualquer marca.
+      </p>
+
+      <details class="app-card" id="strava" open>
+        <summary>Strava</summary>
+        <p>O app do Strava não exporta arquivos. É preciso usar o site, pelo navegador do celular.</p>
+        <ol>
+          <li>No app do Strava, abra a corrida e toque em <strong>Compartilhar → Copiar link</strong>.</li>
+          <li>Abra o navegador (Safari ou Chrome), cole o link na barra de endereço e entre na sua conta, se ele pedir.</li>
+          <li>
+            Quando a página da atividade abrir, toque na barra de endereço e acrescente
+            <code>/export_gpx</code> no final. Fica assim:<br />
+            <code class="url">strava.com/activities/<em>1234567890</em>/export_gpx</code>
+          </li>
+          <li>Confirme, e o download do arquivo <code>.gpx</code> começa.</li>
+        </ol>
+        <p class="alt">
+          <strong>Outra forma:</strong> ative <em>"Versão para computador"</em> no menu do navegador, abra a atividade e toque em
+          <strong>⋯ → Exportar GPX</strong>.
+        </p>
+        <p class="note">Só funciona com as suas próprias atividades.</p>
+      </details>
+
+      <details class="app-card" id="garmin">
+        <summary>Garmin Connect</summary>
+        <p>O app Garmin Connect também não exporta. Use o site pelo navegador do celular.</p>
+        <ol>
+          <li>Abra <a href="https://connect.garmin.com" target="_blank" rel="noopener">connect.garmin.com</a> no navegador e faça login.</li>
+          <li>Vá em <strong>Atividades</strong> e abra a corrida.</li>
+          <li>Toque no ícone de <strong>engrenagem ⚙</strong>, no canto superior direito, e escolha <strong>exportar em GPX</strong>.</li>
+        </ol>
+        <p class="note">
+          Evite o "Exportar original": ele baixa um <code>.zip</code>. Se baixar o zip mesmo assim, abra-o e envie o arquivo
+          <code>.fit</code> que está dentro.
+        </p>
+      </details>
+
+      <details class="app-card" id="coros">
+        <summary>Coros</summary>
+        <ol>
+          <li>No app Coros, abra a corrida.</li>
+          <li>Toque nos <strong>três pontinhos ⋯</strong>, no canto superior direito, e em <strong>Exportar dados</strong>.</li>
+          <li>Escolha <strong>GPX</strong> ou <strong>FIT</strong> e salve em <strong>Arquivos</strong> (iPhone) ou em Downloads (Android).</li>
+        </ol>
+      </details>
+
+      <details class="app-card" id="suunto">
+        <summary>Suunto</summary>
+        <ol>
+          <li>No app Suunto, abra o treino.</li>
+          <li>Toque nos <strong>três pontinhos ⋮</strong>, no canto superior direito.</li>
+          <li>Escolha exportar como <strong>FIT</strong> ou <strong>GPX</strong> e salve o arquivo no celular.</li>
+        </ol>
+      </details>
+
+      <details class="app-card" id="polar">
+        <summary>Polar</summary>
+        <p>O app Polar Flow não exporta. Use o site pelo navegador do celular.</p>
+        <ol>
+          <li>Abra <a href="https://flow.polar.com" target="_blank" rel="noopener">flow.polar.com</a> e faça login.</li>
+          <li>Vá em <strong>Diário</strong> e abra a corrida.</li>
+          <li>No menu <strong>Exportar</strong>, no canto superior direito, escolha <strong>GPX</strong>, <strong>TCX</strong> ou <strong>FIT</strong>.</li>
+        </ol>
+      </details>
+
+      <details class="app-card" id="apple">
+        <summary>Apple Watch</summary>
+        <p>O app Saúde da Apple não exporta corridas em arquivo. Você tem dois caminhos:</p>
+        <ol>
+          <li>Se as corridas vão para o <strong>Strava</strong>, siga o passo a passo do Strava acima.</li>
+          <li>
+            Ou use um app que exporta os treinos do Saúde, como o <strong>HealthFit</strong> (pago): escolha a corrida e salve
+            o arquivo <strong>FIT</strong> ou <strong>GPX</strong> no app Arquivos.
+          </li>
+        </ol>
+      </details>
+
+      <details class="app-card" id="outros">
+        <summary>Outros apps</summary>
+        <p>
+          Procure por <strong>Exportar</strong>, <strong>Baixar</strong> ou <strong>Compartilhar arquivo</strong> na tela da atividade,
+          ou no site do app. Se o app não exporta (como o Nike Run Club), veja se ele sincroniza com o Strava ou com o
+          Apple Saúde e siga um dos caminhos acima.
+        </p>
+      </details>
+
+      <section class="after">
+        <h2>Baixou? Agora é só voltar</h2>
+        <p>
+          No iPhone, o arquivo fica no app <strong>Arquivos</strong>, na pasta <strong>Downloads</strong>. No Android, fica em
+          <strong>Downloads</strong>. Volte ao rastro.run, toque em <strong>Escolher arquivo</strong> e selecione o arquivo.
+        </p>
+        <a class="primary-btn" href="/">Voltar e criar meu vídeo</a>
+      </section>
+    </main>
+
+    <script type="module" src="/src/help.ts"></script>
+  </body>
+</html>

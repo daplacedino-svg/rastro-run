@@ -8,6 +8,12 @@ export default defineConfig(({ mode }) => ({
   build: {
     target: 'es2022',
     chunkSizeWarningLimit: 1500,
+    rolldownOptions: {
+      input: {
+        main: 'index.html',
+        'como-exportar': 'como-exportar.html',
+      },
+    },
   },
   worker: {
     // o worker do MapLibre é um módulo ES

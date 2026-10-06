@@ -348,3 +348,119 @@ h1 {
   height: 960px;
   pointer-events: none;
 }
+
+/* ---- página "Como pegar o arquivo" ---- */
+.help-link {
+  text-align: center;
+  align-self: center;
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+  padding: 4px 8px;
+}
+
+.help {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.help h2 {
+  font-size: 20px;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.help code {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  background: var(--line);
+  border-radius: 6px;
+  padding: 1px 6px;
+}
+.help code.url {
+  display: inline-block;
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+}
+.help code em {
+  color: var(--muted);
+}
+.help a:not(.primary-btn) {
+  color: var(--ink);
+  text-decoration-color: var(--accent);
+}
+
+.tip {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line));
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.app-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0 16px;
+}
+.app-card summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 16px 0;
+  font-weight: 700;
+  font-size: 17px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.app-card summary::-webkit-details-marker {
+  display: none;
+}
+.app-card summary::after {
+  content: '+';
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--accent);
+  line-height: 1;
+}
+.app-card[open] summary::after {
+  content: '–';
+}
+.app-card p,
+.app-card ol {
+  margin: 0 0 12px;
+  line-height: 1.55;
+  font-size: 15px;
+}
+.app-card ol {
+  padding-left: 22px;
+}
+.app-card li + li {
+  margin-top: 8px;
+}
+.app-card[open] {
+  padding-bottom: 4px;
+}
+.app-card .alt,
+.app-card .note {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.after {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+.after p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}

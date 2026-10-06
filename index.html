@@ -20,11 +20,14 @@
         <p class="lead">Suba o arquivo do relógio e baixe um vídeo vertical curtinho para Reels e Stories.</p>
 
         <label class="dropzone" id="dropzone">
-          <input id="file-input" type="file" accept=".gpx,.fit,.tcx,application/gpx+xml,application/vnd.garmin.tcx+xml" hidden />
+          <!-- sem "accept": o Safari do iPhone deixa .fit/.gpx desabilitados quando não reconhece a extensão.
+               O formato é validado pelo conteúdo em src/parsers. -->
+          <input id="file-input" type="file" hidden />
           <svg viewBox="0 0 24 24" width="32" height="32" aria-hidden="true"><path fill="currentColor" d="M11 16V7.8l-2.6 2.6L7 9l5-5 5 5-1.4 1.4L13 7.8V16h-2Zm-6 4q-.8 0-1.4-.6T3 18v-3h2v3h14v-3h2v3q0 .8-.6 1.4T19 20H5Z"/></svg>
           <strong>Escolher arquivo</strong>
           <span>GPX, FIT ou TCX</span>
         </label>
+        <a class="help-link" href="/como-exportar">Como pegar o arquivo da corrida?</a>
         <button id="sample-btn" class="link-btn" type="button">ou testar com o exemplo</button>
         <p id="upload-error" class="error" role="alert" hidden></p>
         <p class="privacy">Tudo acontece no seu aparelho. O arquivo não é enviado para nenhum servidor.</p>

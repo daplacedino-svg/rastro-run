@@ -12,6 +12,13 @@ export async function parseTrackFile(file: File): Promise<RawTrack> {
   const buffer = await file.arrayBuffer();
   let track: RawTrack;
 
+  const head = new Uint8Array(buffer, 0, Math.min(4, buffer.byteLength));
+  if (ext === 'zip' || (head[0] === 0x50 && head[1] === 0x4b && head[2] === 0x03 && head[3] === 0x04)) {
+    throw new TrackParseError(
+      'Este é um arquivo .zip. Abra o zip e envie o arquivo .fit que está dentro, ou exporte a atividade em GPX.',
+    );
+  }
+
   const looksFit = buffer.byteLength > 12 && new TextDecoder().decode(new Uint8Array(buffer, 8, 4)) === '.FIT';
   if (ext === 'fit' || looksFit) {
     track = await parseFit(buffer);
