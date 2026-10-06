@@ -20,7 +20,7 @@ npm run dev:https
 ```
 
 Abra no celular o endereço `https://192.168.x.x:5173` que aparecer como **Network** e aceite o aviso
-de certificado (é autoassinado). Outra opção é usar a URL de preview do Cloudflare Pages.
+de certificado (é autoassinado). Outra opção é usar a URL publicada no Cloudflare (já tem HTTPS).
 
 ## Como o vídeo é gerado
 
@@ -52,7 +52,7 @@ na tela ou pela URL: `?camera=direcao`.
 ## Trocar a fonte do satélite
 
 Só o arquivo `src/map/tile-sources.ts` conhece os provedores. Configure no `.env` (veja `.env.example`)
-ou nas variáveis de ambiente do Cloudflare Pages:
+ou nas variáveis de build do Worker no Cloudflare:
 
 | Provedor | Variáveis |
 | --- | --- |
@@ -62,18 +62,25 @@ ou nas variáveis de ambiente do Cloudflare Pages:
 
 Tokens de front-end ficam públicos no bundle. Restrinja-os por domínio no painel do provedor.
 
-## Deploy no Cloudflare Pages
+## Deploy no Cloudflare Workers
 
-1. Suba este repositório para o GitHub.
-2. No Cloudflare: **Workers & Pages → Create → Pages → Connect to Git** e escolha o repositório.
-3. Configuração de build:
-   - Framework preset: **Vite** (ou nenhum)
+O site é publicado como *static assets* de um Worker, sem código de servidor. A configuração
+fica em `wrangler.jsonc`, que publica a pasta `dist/`.
+
+1. No Cloudflare: **Workers & Pages → Create → Import a repository** e escolha este repositório.
+2. Configuração:
+   - Project name: `rastro-run` (precisa ser igual ao `name` do `wrangler.jsonc`)
    - Build command: `npm run build`
-   - Build output directory: `dist`
-   - Variável `NODE_VERSION` = `22` (o arquivo `.node-version` já indica isso)
-4. Cada push na `main` publica em produção; cada branch/PR ganha uma URL de preview com HTTPS.
+   - Deploy command: `npx wrangler deploy`
+   - A versão do Node vem do arquivo `.node-version` (22).
+3. Cada push na `main` publica em produção. As outras branches geram versões de preview com URL própria.
+
+Variáveis do Vite (`VITE_*`, como o token do Mapbox) entram no build. Configure-as em
+**Settings → Build → Variables and secrets** do Worker, e não nas variáveis de runtime.
 
 `public/_headers` define o cache dos assets com hash.
+
+Para publicar direto do seu computador (opcional): `npm run build && npx wrangler deploy`.
 
 ## Exemplo
 

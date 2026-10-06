@@ -116,7 +116,7 @@ ui.sampleBtn.addEventListener('click', async () => {
   try {
     const res = await fetch('/samples/exemplo.gpx');
     const text = res.ok ? await res.text() : '';
-    // sem o arquivo, o Cloudflare Pages devolve o index.html (fallback de SPA)
+    // alguns hosts devolvem o index.html no lugar de um arquivo ausente (fallback de SPA)
     if (!/<gpx[\s>]/i.test(text.slice(0, 2000))) throw new Error('exemplo ausente');
     await loadFile(new File([text], 'exemplo.gpx', { type: 'application/gpx+xml' }));
   } catch {

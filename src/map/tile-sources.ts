@@ -1,5 +1,5 @@
 // Único lugar que sabe de onde vêm as imagens de satélite.
-// Para trocar de provedor, defina no .env (ou nas variáveis do Cloudflare Pages):
+// Para trocar de provedor, defina no .env (ou nas variáveis de build do Worker no Cloudflare):
 //   VITE_TILE_PROVIDER=mapbox   + VITE_MAPBOX_TOKEN=pk....
 //   VITE_TILE_PROVIDER=maptiler + VITE_MAPTILER_KEY=....
 // Sem nada configurado, usa Esri World Imagery (gratuito para protótipo, exige atribuição).

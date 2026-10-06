@@ -1,0 +1,10 @@
+// Deploy no Cloudflare Workers (site 100% estático, sem código de servidor).
+// O build (`npm run build`) gera `dist/`, que é publicado como está.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "rastro-run",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./dist"
+  }
+}
