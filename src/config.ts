@@ -4,12 +4,27 @@ export const VIDEO = {
   width: 1080,
   height: 1920,
   fps: 30,
-  durationSec: 25,
   /** bits por segundo do H.264 — satélite tem muito detalhe, então não economize demais */
   bitrate: 8_000_000,
 } as const;
 
-/** Divisão dos 25 s: abertura → corrida → fechamento (zoom-out + comemoração). */
+/**
+ * Duração do vídeo pela distância: base + k·√km, com piso e teto.
+ * Cresce devagar (dobrar a distância não dobra o vídeo): 3 km ≈ 15 s, 10 km ≈ 20 s, 42 km ≈ 30 s.
+ */
+export const DURATION = {
+  baseSec: 10,
+  perSqrtKmSec: 3,
+  minSec: 12,
+  maxSec: 35,
+} as const;
+
+export function videoDurationSec(distanceMeters: number): number {
+  const sec = DURATION.baseSec + DURATION.perSqrtKmSec * Math.sqrt(Math.max(0, distanceMeters) / 1000);
+  return Math.min(DURATION.maxSec, Math.max(DURATION.minSec, sec));
+}
+
+/** Divisão do vídeo: abertura e fechamento fixos; a corrida ocupa o resto. */
 export const TIMELINE = {
   introSec: 2,
   outroSec: 4,
@@ -22,43 +37,11 @@ export const MAP_PIXEL_RATIO = 2;
 export const MAP_CSS_WIDTH = VIDEO.width / MAP_PIXEL_RATIO;
 export const MAP_CSS_HEIGHT = VIDEO.height / MAP_PIXEL_RATIO;
 
-export type CameraPresetId = 'suave' | 'direcao' | 'fixa';
-
-export interface CameraPreset {
-  label: string;
-  /** suavização do centro da câmera (desvio-padrão em segundos de vídeo) */
-  centerSmoothSec: number;
-  /** 'heading' gira junto com o trajeto; 'fixed' mantém a orientação do eixo principal do percurso */
-  bearingMode: 'heading' | 'fixed';
-  /** suavização da rotação (s); quanto maior, mais devagar a câmera gira */
-  bearingSmoothSec: number;
-}
-
-export const CAMERA_PRESETS: Record<CameraPresetId, CameraPreset> = {
-  suave: {
-    label: 'Suave (corredor no centro, gira devagar)',
-    centerSmoothSec: 1.2,
-    bearingMode: 'heading',
-    bearingSmoothSec: 4,
-  },
-  direcao: {
-    label: 'Segue a direção (atrás do corredor)',
-    centerSmoothSec: 0.4,
-    bearingMode: 'heading',
-    bearingSmoothSec: 1.2,
-  },
-  fixa: {
-    label: 'Ângulo fixo',
-    centerSmoothSec: 0.9,
-    bearingMode: 'fixed',
-    bearingSmoothSec: 0,
-  },
-};
-
-export const DEFAULT_CAMERA_PRESET: CameraPresetId = 'suave';
-
+/** Câmera de ângulo fixo: orientação do eixo maior do trajeto, segue o corredor sem girar. */
 export const CAMERA = {
   pitch: 60,
+  /** suavização do centro da câmera (desvio-padrão em segundos de vídeo) */
+  centerSmoothSec: 0.9,
   /** velocidade desejada do chão na tela, em larguras de tela por segundo — define o zoom automático */
   screenWidthsPerSec: 0.28,
   minZoom: 11.5,

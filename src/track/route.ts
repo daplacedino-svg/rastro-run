@@ -62,6 +62,23 @@ export class Route {
     return bearing(this.pointAt(a), this.pointAt(b));
   }
 
+  private _drawPath?: { coords: LngLat[]; cum: Float64Array };
+
+  /**
+   * Versão do trajeto para desenhar a linha a cada quadro: pontos a cada poucos metros,
+   * limitada a ~3000 pontos para uma maratona gravada a 1 Hz não pesar no render.
+   */
+  get drawPath(): { coords: LngLat[]; cum: Float64Array } {
+    if (!this._drawPath) {
+      const n = Math.max(2, Math.min(3000, Math.ceil(this.length / 4)) + 1);
+      const coords = this.sample(n);
+      const cum = new Float64Array(n);
+      for (let i = 0; i < n; i++) cum[i] = (this.length * i) / (n - 1);
+      this._drawPath = { coords, cum };
+    }
+    return this._drawPath;
+  }
+
   /** Amostra o trajeto em `n` pontos igualmente espaçados. */
   sample(n: number): LngLat[] {
     const out: LngLat[] = [];

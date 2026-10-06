@@ -263,30 +263,11 @@ h1 {
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
+.track-info .wide,
 .stats .wide {
   grid-column: 1 / -1;
 }
 
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-size: 14px;
-  font-weight: 600;
-}
-.field em {
-  color: var(--muted);
-  font-weight: 400;
-}
-.field select {
-  font: inherit;
-  font-weight: 500;
-  padding: 12px;
-  border-radius: 12px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  color: var(--ink);
-}
 
 .actions {
   display: flex;

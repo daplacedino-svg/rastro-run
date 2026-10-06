@@ -1,5 +1,5 @@
 import './ui/styles.css';
-import { CAMERA_PRESETS, DEFAULT_CAMERA_PRESET, VIDEO, type CameraPresetId } from './config';
+import { VIDEO, videoDurationSec } from './config';
 import { exportVideo, pickExportMethod, type ExportMethod, type ExportResult } from './export';
 import { buildCameraPath } from './map/camera';
 import { createMap, type RastroMap } from './map/create-map';
@@ -40,7 +40,6 @@ const ui = {
   scrubber: $<HTMLInputElement>('scrubber'),
   timeLabel: $('time-label'),
   trackInfo: $('track-info'),
-  cameraSelect: $<HTMLSelectElement>('camera-select'),
   actions: $('actions'),
   exportBtn: $<HTMLButtonElement>('export-btn'),
   newFileBtn: $<HTMLButtonElement>('new-file-btn'),
@@ -65,9 +64,6 @@ let sprites: RunnerSprites | null = null;
 let compositor: Compositor | null = null;
 let route: Route | null = null;
 let scene: Scene | null = null;
-let cameraPreset: CameraPresetId = (params.get('camera') as CameraPresetId) in CAMERA_PRESETS
-  ? (params.get('camera') as CameraPresetId)
-  : DEFAULT_CAMERA_PRESET;
 let resultUrl: string | null = null;
 let exportAbort: AbortController | null = null;
 
@@ -77,20 +73,6 @@ const preview = new Preview((frame, total, playing) => {
   ui.timeLabel.textContent = `${(frame / VIDEO.fps).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} s`;
   ui.iconPlay.hidden = playing;
   ui.iconPause.hidden = !playing;
-});
-
-// ---------- seletor de câmera (modos em teste) ----------
-for (const [id, preset] of Object.entries(CAMERA_PRESETS)) {
-  const opt = new Option(preset.label, id, false, id === cameraPreset);
-  ui.cameraSelect.add(opt);
-}
-ui.cameraSelect.addEventListener('change', () => {
-  cameraPreset = ui.cameraSelect.value as CameraPresetId;
-  const url = new URL(location.href);
-  url.searchParams.set('camera', cameraPreset);
-  history.replaceState(null, '', url);
-  rebuildScene();
-  preview.play();
 });
 
 // ---------- carregar arquivo ----------
@@ -153,14 +135,13 @@ async function loadFile(file: File) {
       ui.loading.hidden = true;
     }
   }
-  rmap.setRoute(route);
   rebuildScene();
   preview.play();
 }
 
 function rebuildScene() {
   if (!rmap || !route || !compositor) return;
-  const path = buildCameraPath(route, cameraPreset, rmap.map);
+  const path = buildCameraPath(route, rmap.map);
   scene = { rmap, route, path, compositor };
   preview.setScene(scene);
   if (import.meta.env.DEV) {
@@ -176,13 +157,19 @@ function rebuildScene() {
 
 function renderTrackInfo(raw: RawTrack, r: Route, fileName: string) {
   const times = raw.points.map((p) => p.time).filter((t): t is number => t != null);
-  const items: [string, string][] = [
+  const items: [string, string, boolean?][] = [
     ['Distância', formatKm(r.displayDistance)],
     ['Tempo', times.length > 1 ? formatClock(times[times.length - 1] - times[0]) : '—'],
+    ['Duração do vídeo', `${Math.round(videoDurationSec(r.displayDistance))} s`],
     ['Pontos de GPS', raw.points.length.toLocaleString('pt-BR')],
-    ['Arquivo', fileName],
+    ['Arquivo', fileName, true],
   ];
-  ui.trackInfo.innerHTML = items.map(([k, v]) => `<div><dt>${k}</dt><dd title="${escapeHtml(v)}">${escapeHtml(v)}</dd></div>`).join('');
+  ui.trackInfo.innerHTML = items
+    .map(
+      ([k, v, wide]) =>
+        `<div${wide ? ' class="wide"' : ''}><dt>${k}</dt><dd title="${escapeHtml(v)}">${escapeHtml(v)}</dd></div>`,
+    )
+    .join('');
 }
 
 // ---------- prévia ----------
@@ -305,7 +292,6 @@ function showResult(
 
   ui.controls.hidden = true;
   ui.actions.hidden = true;
-  ui.cameraSelect.parentElement!.hidden = true;
   ui.result.hidden = false;
 }
 
@@ -316,7 +302,6 @@ ui.backBtn.addEventListener('click', () => {
   ui.result.hidden = true;
   ui.controls.hidden = false;
   ui.actions.hidden = false;
-  ui.cameraSelect.parentElement!.hidden = false;
   preview.resume();
 });
 
@@ -329,7 +314,6 @@ function showStudio() {
   ui.canvas.hidden = false;
   ui.controls.hidden = false;
   ui.actions.hidden = false;
-  ui.cameraSelect.parentElement!.hidden = false;
 }
 
 function setBusy(on: boolean) {
@@ -337,7 +321,6 @@ function setBusy(on: boolean) {
   ui.exportBtn.disabled = on;
   ui.playBtn.disabled = on;
   ui.scrubber.disabled = on;
-  ui.cameraSelect.disabled = on;
   ui.newFileBtn.disabled = on;
   if (on) {
     ui.busyBar.style.width = '0%';

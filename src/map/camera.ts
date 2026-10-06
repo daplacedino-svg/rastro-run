@@ -1,5 +1,5 @@
 import type { Map as MlMap } from 'maplibre-gl';
-import { CAMERA, CAMERA_PRESETS, MAP_CSS_HEIGHT, MAP_CSS_WIDTH, TIMELINE, VIDEO, type CameraPresetId } from '../config';
+import { CAMERA, MAP_CSS_HEIGHT, MAP_CSS_WIDTH, TIMELINE, VIDEO, videoDurationSec } from '../config';
 import { easeInOutCubic, phaseOf, runFraction, timelineInfo, type Phase, type TimelineInfo } from '../render/timeline';
 import { angleDiff, bearing, fromMercator, metersPerMercatorUnit, toMercator, type LngLat } from '../track/geo';
 import type { Route } from '../track/route';
@@ -34,9 +34,8 @@ export interface CameraPath {
  * então a prévia e o vídeo exportado mostram exatamente a mesma coisa.
  * `map` é usado só para medir o enquadramento final (zoom-out).
  */
-export function buildCameraPath(route: Route, presetId: CameraPresetId, map: MlMap): CameraPath {
-  const preset = CAMERA_PRESETS[presetId];
-  const tl = timelineInfo();
+export function buildCameraPath(route: Route, map: MlMap): CameraPath {
+  const tl = timelineInfo(videoDurationSec(route.displayDistance));
   const n = tl.totalFrames;
   const fps = VIDEO.fps;
   const runSec = tl.runFrames / fps;
@@ -61,25 +60,13 @@ export function buildCameraPath(route: Route, presetId: CameraPresetId, map: MlM
 
   // Centro da câmera: caminho do corredor suavizado (ele fica "mais ou menos" no meio).
   const merc = runner.map(toMercator);
-  const cx = gaussian(merc.map((m) => m[0]), preset.centerSmoothSec * fps);
-  const cy = gaussian(merc.map((m) => m[1]), preset.centerSmoothSec * fps);
+  const cx = gaussian(merc.map((m) => m[0]), CAMERA.centerSmoothSec * fps);
+  const cy = gaussian(merc.map((m) => m[1]), CAMERA.centerSmoothSec * fps);
 
-  // Rotação.
+  // Ângulo fixo durante a corrida: o eixo maior do trajeto fica na vertical da tela.
+  // (Girar junto com o trajeto foi testado e deixava o vídeo girando demais.)
   const axis = principalAxisBearing(route);
-  let followBearing: Float64Array;
-  if (preset.bearingMode === 'fixed') {
-    followBearing = new Float64Array(n).fill(axis);
-  } else {
-    const span = Math.max(30, speed * 0.8);
-    const raw = new Float64Array(n);
-    let prev = route.headingAt(0, span);
-    for (let i = 0; i < n; i++) {
-      // "desenrola" o ângulo para a suavização não dar a volta pelo lado errado em 180°/-180°
-      prev = prev + angleDiff(prev, route.headingAt(dist[i], span));
-      raw[i] = prev;
-    }
-    followBearing = gaussian(Array.from(raw), preset.bearingSmoothSec * fps);
-  }
+  const followBearing = new Float64Array(n).fill(axis);
 
   const followPadding = 2 * CAMERA.followOffsetY * MAP_CSS_HEIGHT;
   const follow = (i: number): Omit<FramePose, 'runner' | 'runnerDist' | 'progress' | 'phase' | 'phaseTime' | 'facing'> => ({
@@ -90,15 +77,8 @@ export function buildCameraPath(route: Route, presetId: CameraPresetId, map: MlM
     paddingTop: followPadding,
   });
 
-  // Fechamento: visão geral com o eixo maior do trajeto na vertical (aproveita o 9:16).
-  const lastFollowBearing = followBearing[tl.introFrames + tl.runFrames - 1];
-  const overviewBearing =
-    preset.bearingMode === 'fixed'
-      ? axis
-      : Math.abs(angleDiff(lastFollowBearing, axis)) <= 90
-        ? lastFollowBearing + angleDiff(lastFollowBearing, axis)
-        : lastFollowBearing + angleDiff(lastFollowBearing, axis + 180);
-  const overview = fitOverview(map, route, overviewBearing, CAMERA.outroPitch);
+  // Fechamento: visão geral com o mesmo ângulo, trajeto inteiro na tela (aproveita o 9:16).
+  const overview = fitOverview(map, route, axis, CAMERA.outroPitch);
 
   // Lado para onde o bonequinho olha: componente horizontal, na tela, da direção do trajeto.
   // Histerese para ele não ficar virando de um lado para o outro em trechos "para cima".
@@ -243,8 +223,21 @@ function fitOverview(
       minY = Math.min(minY, s.y);
       maxY = Math.max(maxY, s.y);
     }
-    return { minX, maxX, minY, maxY };
+    return { minX, maxX, minY, maxY, finish: map.project(route.end) };
   };
+
+  // Na chegada ficam o bonequinho comemorando e a etiqueta de km (maior no fechamento):
+  // o ponto final precisa de folga extra para eles não saírem cortados. Valores em CSS px.
+  const finishSafe = { side: 105, top: 180, bottom: 30 };
+  const fitsOnScreen = (b: ReturnType<typeof measure>) =>
+    b.minX >= safe.left &&
+    b.maxX <= safe.right &&
+    b.minY >= safe.top &&
+    b.maxY <= safe.bottom &&
+    b.finish.x >= finishSafe.side &&
+    b.finish.x <= MAP_CSS_WIDTH - finishSafe.side &&
+    b.finish.y >= finishSafe.top &&
+    b.finish.y <= MAP_CSS_HEIGHT - finishSafe.bottom;
 
   for (let iter = 0; iter < 3; iter++) {
     // busca binária do maior zoom que cabe
@@ -264,6 +257,19 @@ function fitOverview(
     const boxCy = (b.minY + b.maxY) / 2;
     const shifted = map.unproject([MAP_CSS_WIDTH / 2 + (boxCx - safeCx), MAP_CSS_HEIGHT / 2 + (boxCy - safeCy)]);
     center = [shifted.lng, shifted.lat];
+  }
+
+  // passada final no centro definitivo: afasta o que for preciso para tudo caber de verdade,
+  // incluindo a folga da chegada
+  if (!fitsOnScreen(measure(center, zoom))) {
+    let lo = 3;
+    let hi = zoom;
+    for (let k = 0; k < 18; k++) {
+      const mid = (lo + hi) / 2;
+      if (fitsOnScreen(measure(center, mid))) lo = mid;
+      else hi = mid;
+    }
+    zoom = lo;
   }
 
   map.jumpTo(saved);

@@ -1,22 +1,16 @@
-import { Map as MlMap, setWorkerUrl, type ExpressionSpecification, type GeoJSONSource, type StyleSpecification } from 'maplibre-gl';
+import { Map as MlMap, setWorkerUrl, type StyleSpecification } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 // O MapLibre 6 carrega o worker por URL relativa ao próprio módulo, o que não sobrevive ao
 // bundle do Vite. Empacotamos o worker (com as dependências dele) e passamos a URL explícita.
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 
 setWorkerUrl(maplibreWorkerUrl);
-import { MAP_PIXEL_RATIO, STYLE } from '../config';
-import type { Route } from '../track/route';
+import { MAP_PIXEL_RATIO } from '../config';
 import { registerTileCache, toCachedUrl } from './tile-cache';
 import type { TileSource } from './tile-sources';
 
-const ROUTE_SOURCE = 'route';
-const ROUTE_LAYERS = ['route-glow', 'route-casing', 'route-line'] as const;
-const ROUTE_COLORS: Record<(typeof ROUTE_LAYERS)[number], string> = {
-  'route-glow': STYLE.routeColor,
-  'route-casing': STYLE.routeCasing,
-  'route-line': STYLE.routeColor,
-};
+// O mapa só tem o satélite. O rastro é desenhado pelo compositor (src/render/compositor.ts):
+// revelar a linha dentro do MapLibre obrigava a reprocessar o trajeto inteiro a cada quadro.
 
 function buildStyle(source: TileSource): StyleSpecification {
   return {
@@ -28,11 +22,6 @@ function buildStyle(source: TileSource): StyleSpecification {
         tileSize: source.tileSize,
         maxzoom: source.maxzoom,
         attribution: source.attribution,
-      },
-      [ROUTE_SOURCE]: {
-        type: 'geojson',
-        lineMetrics: true,
-        data: { type: 'FeatureCollection', features: [] },
       },
     },
     sky: {
@@ -53,36 +42,12 @@ function buildStyle(source: TileSource): StyleSpecification {
         // sem fade: cada quadro gravado precisa estar 100% pronto
         paint: { 'raster-fade-duration': 0 },
       },
-      {
-        id: 'route-glow',
-        type: 'line',
-        source: ROUTE_SOURCE,
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-width': STYLE.routeWidth * 3, 'line-blur': STYLE.routeWidth * 1.5, 'line-opacity': 0.45 },
-      },
-      {
-        id: 'route-casing',
-        type: 'line',
-        source: ROUTE_SOURCE,
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-width': STYLE.routeWidth + 4 },
-      },
-      {
-        id: 'route-line',
-        type: 'line',
-        source: ROUTE_SOURCE,
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-width': STYLE.routeWidth },
-      },
     ],
   };
 }
 
 export interface RastroMap {
   map: MlMap;
-  setRoute(route: Route): void;
-  /** Revela o trajeto até a fração `p` (0..1). */
-  setProgress(p: number): void;
 }
 
 export function createMap(container: HTMLElement, source: TileSource): Promise<RastroMap> {
@@ -102,31 +67,8 @@ export function createMap(container: HTMLElement, source: TileSource): Promise<R
     canvasContextAttributes: { preserveDrawingBuffer: true, antialias: true },
   });
 
-  let lastProgress = -1;
-  const api: RastroMap = {
-    map,
-    setRoute(route) {
-      const src = map.getSource(ROUTE_SOURCE) as GeoJSONSource;
-      src.setData({
-        type: 'Feature',
-        properties: {},
-        geometry: { type: 'LineString', coordinates: route.coords },
-      });
-      lastProgress = -1;
-      api.setProgress(0);
-    },
-    setProgress(p) {
-      const clamped = Math.min(1, Math.max(0, p));
-      if (Math.abs(clamped - lastProgress) < 1e-6) return;
-      lastProgress = clamped;
-      for (const id of ROUTE_LAYERS) {
-        map.setPaintProperty(id, 'line-gradient', revealGradient(ROUTE_COLORS[id], clamped));
-      }
-    },
-  };
-
   return new Promise((resolve, reject) => {
-    map.once('load', () => resolve(api));
+    map.once('load', () => resolve({ map }));
     map.on('error', (e) => {
       if (!map.loaded()) reject(e.error);
       else console.warn('[mapa]', e.error?.message);
@@ -134,48 +76,23 @@ export function createMap(container: HTMLElement, source: TileSource): Promise<R
   });
 }
 
-function revealGradient(color: string, p: number): ExpressionSpecification {
-  if (p >= 1) return ['step', ['line-progress'], color, 2, color];
-  if (p <= 0) return ['step', ['line-progress'], 'rgba(0,0,0,0)', 2, 'rgba(0,0,0,0)'];
-  return ['step', ['line-progress'], color, p, 'rgba(0,0,0,0)'];
-}
-
 const isReady = (map: MlMap) => map.loaded() && map.areTilesLoaded();
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /**
  * Desenha o mapa agora (síncrono, sem esperar o próximo quadro da tela); se faltar
- * tile, redesenha a cada tile que chega até ficar completo. Não depende de
- * requestAnimationFrame, então funciona igual com a aba em segundo plano e não
- * perde ~16 ms por quadro esperando o vsync.
+ * tile, espera chegar e redesenha. Não depende de requestAnimationFrame, então
+ * funciona com a aba em segundo plano e não perde ~16 ms por quadro esperando o vsync.
  */
 export async function renderNow(map: MlMap, timeoutMs = 15000): Promise<void> {
   map.redraw();
   if (isReady(map)) return;
-  await new Promise<void>((resolve) => {
-    let scheduled = false;
-    const check = () => {
-      scheduled = false;
-      map.redraw();
-      if (isReady(map)) finish();
-    };
-    const onData = () => {
-      if (!scheduled) {
-        scheduled = true;
-        setTimeout(check, 0);
-      }
-    };
-    const poll = setInterval(check, 100); // rede para quando um evento se perde
-    const timer = setTimeout(finish, timeoutMs);
-    function finish() {
-      clearInterval(poll);
-      clearTimeout(timer);
-      map.off('data', onData);
-      map.off('dataabort', onData);
-      map.off('error', onData);
-      resolve();
-    }
-    map.on('data', onData);
-    map.on('dataabort', onData);
-    map.on('error', onData);
-  });
+  const deadline = performance.now() + timeoutMs;
+  while (performance.now() < deadline) {
+    await sleep(4);
+    // o estado dos tiles muda sozinho quando eles chegam; só redesenha quando vale a pena
+    if (!map.areTilesLoaded()) continue;
+    map.redraw();
+    if (isReady(map)) return;
+  }
 }

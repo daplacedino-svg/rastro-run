@@ -9,8 +9,8 @@ export interface TimelineInfo {
   outroFrames: number;
 }
 
-export function timelineInfo(): TimelineInfo {
-  const totalFrames = Math.round(VIDEO.durationSec * VIDEO.fps);
+export function timelineInfo(durationSec: number): TimelineInfo {
+  const totalFrames = Math.round(durationSec * VIDEO.fps);
   const introFrames = Math.round(TIMELINE.introSec * VIDEO.fps);
   const outroFrames = Math.round(TIMELINE.outroSec * VIDEO.fps);
   return { totalFrames, introFrames, outroFrames, runFrames: totalFrames - introFrames - outroFrames };

@@ -1,6 +1,6 @@
 # rastro.run
 
-Transforma uma corrida (GPX, FIT ou TCX) em um vídeo vertical de 25 s: um bonequinho correndo
+Transforma uma corrida (GPX, FIT ou TCX) em um vídeo vertical curto (de 12 a 35 s, conforme a distância): um bonequinho correndo
 sobre o trajeto num mapa de satélite 3D, com a câmera sobrevoando. Tudo roda no navegador, sem servidor.
 
 ## Rodando localmente
@@ -25,13 +25,15 @@ de certificado (é autoassinado). Outra opção é usar a URL publicada no Cloud
 ## Como o vídeo é gerado
 
 1. **Trajeto** (`src/parsers`, `src/track`): lê o arquivo, remove pontos parados e suaviza o GPS.
-2. **Câmera** (`src/map/camera.ts`): calcula a pose de *todos* os 750 quadros de uma vez
+2. **Câmera** (`src/map/camera.ts`): calcula a pose de *todos* os quadros de uma vez
    (abertura → corrida em velocidade constante → zoom-out final). É determinístico, então a prévia
    e o vídeo mostram a mesma coisa.
 3. **Pré-carregamento** (`src/map/preload.ts`): lista, com `map.coveringTiles()`, todos os tiles que
    a câmera vai usar e baixa em paralelo para um cache em memória (`src/map/tile-cache.ts`).
 4. **Render** (`src/render`): para cada quadro, posiciona o mapa, desenha de forma síncrona
-   (`map.redraw()`) e junta mapa + bonequinho + km num canvas 1080×1920.
+   (`map.redraw()`) e junta mapa + rastro + bonequinho + km num canvas 1080×1920. O rastro é
+   projetado pelo próprio compositor e não é uma camada do MapLibre: revelar a linha no MapLibre
+   obrigava a reprocessar o trajeto a cada quadro, e a geração ficava ~10× mais lenta com GPX de 1 Hz.
 5. **Exportação** (`src/export`):
    - **WebCodecs + [Mediabunny](https://mediabunny.dev)** → MP4 H.264, quadro a quadro. Não é em
      tempo real: em aparelho lento demora mais, mas o vídeo sai liso.
@@ -41,11 +43,15 @@ de certificado (é autoassinado). Outra opção é usar a URL publicada no Cloud
 
 ## Parâmetros
 
-Tudo em `src/config.ts`: duração, fps, bitrate, divisão abertura/corrida/fechamento, inclinação e
+Tudo em `src/config.ts`: fps, bitrate, divisão abertura/corrida/fechamento, inclinação e
 zoom da câmera, cores, tamanho do bonequinho.
 
-**Modos de câmera (em teste):** `suave` (padrão), `direcao` e `fixa`. Dá para trocar pelo seletor
-na tela ou pela URL: `?camera=direcao`.
+**Duração:** cresce com a raiz da distância: `10 s + 3 s × √km`, limitada entre 12 e 35 s
+(3 km ≈ 15 s, 10 km ≈ 20 s, 21 km ≈ 24 s, 42 km ≈ 30 s). Abertura (2 s) e fechamento (4 s) são
+fixos; só o trecho da corrida estica. Ajuste em `DURATION` no `src/config.ts`.
+
+**Câmera:** ângulo fixo, alinhado ao eixo maior do trajeto. Ela segue o corredor sem girar. Modos que
+giravam junto com o trajeto foram testados e descartados porque o vídeo girava demais.
 
 **Forçar o fallback:** `?metodo=mediarecorder`.
 

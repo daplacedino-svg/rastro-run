@@ -14,9 +14,7 @@ export interface Scene {
 
 /** Posiciona mapa e trajeto no quadro `i` (sem desenhar). */
 export function setFrame(scene: Scene, i: number): void {
-  const pose = scene.path.frames[i];
-  scene.rmap.setProgress(pose.progress);
-  applyPose(scene.rmap.map, pose);
+  applyPose(scene.rmap.map, scene.path.frames[i]);
 }
 
 /** Desenha o quadro `i` completo, esperando todos os tiles. Usado na exportação. */
