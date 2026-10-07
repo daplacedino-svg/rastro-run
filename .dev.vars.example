@@ -1,0 +1,7 @@
+# Copie para .dev.vars (que não vai para o git) e preencha. Usado pelo `npm run dev:api`.
+STRAVA_CLIENT_ID=
+STRAVA_CLIENT_SECRET=
+# qualquer texto aleatório longo, ex.: saída de `node -e "console.log(crypto.randomUUID()+crypto.randomUUID())"`
+SESSION_SECRET=
+# no desenvolvimento o site roda no Vite; o Strava devolve o usuário para cá
+APP_ORIGIN=http://localhost:5173

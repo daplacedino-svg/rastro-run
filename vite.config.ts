@@ -21,5 +21,7 @@ export default defineConfig(({ mode }) => ({
   },
   server: {
     host: true,
+    // /api/* é atendido pelo Worker local (`npm run dev:api`, porta 8787)
+    proxy: { '/api': 'http://localhost:8787' },
   },
 }));

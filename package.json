@@ -1,13 +1,14 @@
 {
-  "name": "rastro-run",
+  "name": "rodagem-run",
   "private": true,
   "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
-    "preview": "vite preview",
-    "dev:https": "vite --mode https"
+    "dev:https": "vite --mode https",
+    "dev:api": "wrangler dev --port 8787",
+    "build": "tsc --noEmit && tsc --noEmit -p worker && vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
     "@garmin/fitsdk": "^21.217.0",
@@ -15,8 +16,10 @@
     "mediabunny": "^1.61.3"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261006.1",
     "@vitejs/plugin-basic-ssl": "^2.3.0",
     "typescript": "^7.0.2",
-    "vite": "^8.3.2"
+    "vite": "^8.3.2",
+    "wrangler": "^4.148.0"
   }
 }

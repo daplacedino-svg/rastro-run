@@ -1,4 +1,4 @@
-// Parâmetros centrais do rastro.run. Ajuste aqui antes de mexer no resto do código.
+// Parâmetros centrais do rodagem.run. Ajuste aqui antes de mexer no resto do código.
 
 export const VIDEO = {
   width: 1080,

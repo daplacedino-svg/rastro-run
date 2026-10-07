@@ -1,4 +1,4 @@
-# rastro.run
+# rodagem.run
 
 Transforma uma corrida (GPX, FIT ou TCX) em um vídeo vertical curto (de 12 a 35 s, conforme a distância): um bonequinho correndo
 sobre o trajeto num mapa de satélite 3D, com a câmera sobrevoando. Tudo roda no navegador, sem servidor.
@@ -75,14 +75,55 @@ ou nas variáveis de build do Worker no Cloudflare:
 
 Tokens de front-end ficam públicos no bundle. Restrinja-os por domínio no painel do provedor.
 
+## Conectar com Strava
+
+O usuário entra pelo próprio Strava (OAuth), escolhe a atividade numa lista e o trajeto vem
+direto da API, sem precisar de arquivo. O código fica em `worker/` (servidor) e
+`src/strava/` + `src/ui/strava-panel.ts` (site).
+
+- **Sem banco de dados:** os tokens do Strava ficam num cookie `HttpOnly` criptografado (AES-GCM)
+  que só o Worker lê. O trajeto passa pelo Worker e não é guardado.
+- **Permissão pedida:** `activity:read_all`, que inclui atividades "Só você".
+- **Endpoints:** `/api/strava/status`, `/login`, `/callback`, `/activities?page=N`,
+  `/activities/:id/track` e `/logout` (este revoga a autorização no Strava).
+- **Botão escondido por padrão:** só aparece com o Strava configurado **e** `STRAVA_PUBLIC=true`.
+  Antes da aprovação do app, teste abrindo o site com `?strava-beta=1`, que vale para aquele
+  navegador. `?strava-beta=0` desliga.
+
+### Configuração
+
+1. Crie o app em [strava.com/settings/api](https://www.strava.com/settings/api). Em
+   **Authorization Callback Domain**, use `rodagem.run` (sem `https://`). `localhost` sempre funciona.
+2. Coloque o **Client ID** em `vars.STRAVA_CLIENT_ID` no `wrangler.jsonc`.
+3. No Cloudflare (Worker → Settings → Variables and Secrets), crie os segredos
+   `STRAVA_CLIENT_SECRET` e `SESSION_SECRET` (texto aleatório longo).
+4. Para desenvolver localmente: copie `.dev.vars.example` para `.dev.vars`, preencha e rode,
+   em dois terminais:
+   ```bash
+   npm run build && npm run dev:api
+   ```
+   ```bash
+   npm run dev
+   ```
+   O Vite repassa `/api/*` para o Worker local (porta 8787).
+
+### Antes de liberar para todo mundo
+
+- Trocar o botão "Conectar com Strava" pelo **botão oficial** e incluir o selo **"Powered by
+  Strava"**, conforme as regras de marca do Strava.
+- Pedir a revisão do app ao Strava. Apps novos atendem poucos atletas até serem aprovados.
+- Depois da aprovação, mudar `STRAVA_PUBLIC` para `"true"`.
+
 ## Deploy no Cloudflare Workers
 
-O site é publicado como *static assets* de um Worker, sem código de servidor. A configuração
-fica em `wrangler.jsonc`, que publica a pasta `dist/`.
+O site é publicado como *static assets* de um Worker; o código em `worker/` só atende `/api/*`.
+A configuração fica em `wrangler.jsonc`, que publica a pasta `dist/` no domínio **rodagem.run**
+(comprado no Cloudflare Registrar; o deploy cria o DNS e o certificado sozinho).
 
 1. No Cloudflare: **Workers & Pages → Create → Import a repository** e escolha este repositório.
 2. Configuração:
-   - Project name: `rastro-run` (precisa ser igual ao `name` do `wrangler.jsonc`)
+   - Project name: `rastro-run` (precisa ser igual ao `name` do `wrangler.jsonc`; o nome interno
+     continua o do projeto original, o que não aparece para o usuário)
    - Build command: `npm run build`
    - Deploy command: `npx wrangler deploy`
    - A versão do Node vem do arquivo `.node-version` (22).

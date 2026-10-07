@@ -12,6 +12,8 @@ import { parseTrackFile, TrackParseError, type RawTrack } from './parsers';
 import { Compositor } from './render/compositor';
 import { Preview } from './render/preview';
 import { renderFrameExact, type Scene } from './render/scene';
+import { activityUrl } from './strava/client';
+import { initStravaPanel } from './ui/strava-panel';
 import { Route } from './track/route';
 import { formatDuration, formatSeconds, Stopwatch } from './ui/stopwatch';
 
@@ -106,9 +108,11 @@ ui.sampleBtn.addEventListener('click', async () => {
   }
 });
 
+/** De onde veio o trajeto: arquivo enviado ou atividade do Strava. */
+type TrackSource = { kind: 'file'; fileName: string } | { kind: 'strava'; activityId: number };
+
 async function loadFile(file: File) {
   hideError(ui.uploadError);
-  hideError(ui.studioError);
   let raw: RawTrack;
   try {
     raw = await parseTrackFile(file);
@@ -117,10 +121,15 @@ async function loadFile(file: File) {
     console.error(err);
     return;
   }
+  await loadTrack(raw, { kind: 'file', fileName: file.name });
+}
 
+async function loadTrack(raw: RawTrack, source: TrackSource) {
+  hideError(ui.uploadError);
+  hideError(ui.studioError);
   route = new Route(raw);
   showStudio();
-  renderTrackInfo(raw, route, file.name);
+  renderTrackInfo(raw, route, source);
 
   if (!rmap) {
     ui.loading.hidden = false;
@@ -155,22 +164,38 @@ function rebuildScene() {
   }
 }
 
-function renderTrackInfo(raw: RawTrack, r: Route, fileName: string) {
+function renderTrackInfo(raw: RawTrack, r: Route, source: TrackSource) {
   const times = raw.points.map((p) => p.time).filter((t): t is number => t != null);
   const items: [string, string, boolean?][] = [
     ['Distância', formatKm(r.displayDistance)],
     ['Tempo', times.length > 1 ? formatClock(times[times.length - 1] - times[0]) : '—'],
     ['Duração do vídeo', `${Math.round(videoDurationSec(r.displayDistance))} s`],
     ['Pontos de GPS', raw.points.length.toLocaleString('pt-BR')],
-    ['Arquivo', fileName, true],
   ];
+  if (source.kind === 'file') items.push(['Arquivo', source.fileName, true]);
+  else items.push(['Atividade do Strava', raw.name ?? 'Sem nome', true]);
   ui.trackInfo.innerHTML = items
     .map(
       ([k, v, wide]) =>
         `<div${wide ? ' class="wide"' : ''}><dt>${k}</dt><dd title="${escapeHtml(v)}">${escapeHtml(v)}</dd></div>`,
     )
     .join('');
+  if (source.kind === 'strava') {
+    // o Strava exige o link "Ver no Strava" onde os dados dele aparecem
+    const link = document.createElement('a');
+    link.className = 'strava-view';
+    link.href = activityUrl(source.activityId);
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.textContent = 'Ver no Strava';
+    ui.trackInfo.lastElementChild?.append(link);
+  }
 }
+
+// ---------- Strava ----------
+void initStravaPanel({
+  onPick: (raw, activity) => loadTrack(raw, { kind: 'strava', activityId: activity.id }),
+});
 
 // ---------- prévia ----------
 ui.playBtn.addEventListener('click', () => (preview.isPlaying ? preview.pause() : preview.play()));
@@ -258,7 +283,7 @@ function showResult(
 ) {
   if (resultUrl) URL.revokeObjectURL(resultUrl);
   resultUrl = URL.createObjectURL(result.blob);
-  const fileName = `rastro-run-${new Date().toISOString().slice(0, 10)}.${result.extension}`;
+  const fileName = `rodagem-run-${new Date().toISOString().slice(0, 10)}.${result.extension}`;
 
   ui.video.src = resultUrl;
   ui.video.muted = true;

@@ -1,10 +1,31 @@
-// Deploy no Cloudflare Workers (site 100% estático, sem código de servidor).
-// O build (`npm run build`) gera `dist/`, que é publicado como está.
+// Deploy no Cloudflare Workers. O site é estático (dist/, servido direto como assets);
+// o código em worker/ só roda para /api/* (conexão com o Strava).
+//
+// Segredos (Cloudflare → Worker → Settings → Variables and Secrets, tipo "Secret"):
+//   STRAVA_CLIENT_SECRET  — do app em strava.com/settings/api
+//   SESSION_SECRET        — texto aleatório longo, usado para criptografar o cookie de sessão
+// Localmente, ficam no arquivo .dev.vars (veja .dev.vars.example).
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "rastro-run",
+  "main": "worker/index.ts",
   "compatibility_date": "2026-09-01",
+  // Domínio próprio (comprado no Cloudflare Registrar). O deploy cria o DNS e o certificado HTTPS.
+  // O endereço *.workers.dev continua funcionando em paralelo.
+  "routes": [{ "pattern": "rodagem.run", "custom_domain": true }],
   "assets": {
-    "directory": "./dist"
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "vars": {
+    // Client ID do app do Strava (é público). Vazio = botão do Strava escondido.
+    "STRAVA_CLIENT_ID": "",
+    // "true" mostra o botão para todo mundo. Antes da aprovação do Strava, deixe "false"
+    // e teste abrindo o site com ?strava-beta=1
+    "STRAVA_PUBLIC": "false"
+  },
+  "observability": {
+    "enabled": true
   }
 }

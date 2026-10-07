@@ -6,11 +6,11 @@
     <meta name="theme-color" content="#0e121c" />
     <meta name="description" content="Transforme sua corrida em um vídeo de sobrevoo para Reels e Stories. Suba o GPX, FIT ou TCX e baixe o MP4 vertical." />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <title>rastro.run — sua corrida em vídeo</title>
+    <title>rodagem.run — sua corrida em vídeo</title>
   </head>
   <body>
     <header class="topbar">
-      <a class="logo" href="/" aria-label="rastro.run">rastro<span>.run</span></a>
+      <a class="logo" href="/" aria-label="rodagem.run">rodagem<span>.run</span></a>
     </header>
 
     <main class="app">
@@ -18,6 +18,22 @@
       <section id="step-upload" class="step">
         <h1>Sua corrida virando vídeo</h1>
         <p class="lead">Suba o arquivo do relógio e baixe um vídeo vertical curtinho para Reels e Stories.</p>
+
+        <!-- Strava: aparece só quando o Worker está configurado (src/ui/strava-panel.ts) -->
+        <section id="strava-box" class="strava-box" hidden>
+          <a id="strava-connect" class="strava-btn" href="/api/strava/login">Conectar com Strava</a>
+          <div id="strava-connected" hidden>
+            <div class="strava-head">
+              <span id="strava-hello">Escolha uma atividade:</span>
+              <button id="strava-logout" class="link-btn" type="button">Desconectar</button>
+            </div>
+            <ul id="strava-list" class="activity-list"></ul>
+            <button id="strava-more" class="ghost-btn" type="button" hidden>Carregar mais</button>
+          </div>
+          <p id="strava-error" class="error" role="alert" hidden></p>
+          <p class="strava-credit">Dados de atividades fornecidos pelo Strava</p>
+        </section>
+        <div id="or-divider" class="divider" hidden><span>ou envie um arquivo</span></div>
 
         <label class="dropzone" id="dropzone">
           <!-- sem "accept": o Safari do iPhone deixa .fit/.gpx desabilitados quando não reconhece a extensão.
@@ -30,7 +46,10 @@
         <a class="help-link" href="/como-exportar">Como pegar o arquivo da corrida?</a>
         <button id="sample-btn" class="link-btn" type="button">ou testar com o exemplo</button>
         <p id="upload-error" class="error" role="alert" hidden></p>
-        <p class="privacy">Tudo acontece no seu aparelho. O arquivo não é enviado para nenhum servidor.</p>
+        <p class="privacy">
+          O vídeo é gerado no seu aparelho, e arquivos enviados não saem dele.<span id="privacy-strava" hidden>
+          Atividades do Strava passam pelo nosso servidor só para chegar até você, sem ficar guardadas.</span>
+        </p>
       </section>
 
       <!-- 2. Prévia / geração / resultado -->
@@ -72,7 +91,7 @@
 
         <div id="result" class="result" hidden>
           <div class="actions">
-            <a id="download-btn" class="primary-btn" download="rastro-run.mp4">Baixar vídeo</a>
+            <a id="download-btn" class="primary-btn" download="rodagem-run.mp4">Baixar vídeo</a>
             <button id="share-btn" class="ghost-btn" type="button" hidden>Compartilhar</button>
           </div>
           <dl id="result-stats" class="stats"></dl>
@@ -81,7 +100,7 @@
 
         <dl id="track-info" class="track-info"></dl>
 
-        <button id="new-file-btn" class="link-btn" type="button">Usar outro arquivo</button>
+        <button id="new-file-btn" class="link-btn" type="button">Escolher outra corrida</button>
         <p id="attribution" class="attribution"></p>
       </section>
     </main>
