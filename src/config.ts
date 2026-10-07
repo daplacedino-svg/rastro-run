@@ -10,10 +10,11 @@ export const VIDEO = {
 
 /**
  * Duração do vídeo pela distância: base + k·√km, com piso e teto.
- * Cresce devagar (dobrar a distância não dobra o vídeo): 3 km ≈ 15 s, 10 km ≈ 20 s, 42 km ≈ 30 s.
+ * Cresce devagar (dobrar a distância não dobra o vídeo): 3 km ≈ 16 s, 10 km ≈ 20 s, 42 km ≈ 30 s.
+ * (base 11 s = 10 s originais + 1 s de fechamento para ler o cartão de dados)
  */
 export const DURATION = {
-  baseSec: 10,
+  baseSec: 11,
   perSqrtKmSec: 3,
   minSec: 12,
   maxSec: 35,
@@ -27,9 +28,25 @@ export function videoDurationSec(distanceMeters: number): number {
 /** Divisão do vídeo: abertura e fechamento fixos; a corrida ocupa o resto. */
 export const TIMELINE = {
   introSec: 2,
-  outroSec: 4,
+  outroSec: 5,
   /** parte do fechamento usada para a câmera afastar; o resto fica parado na visão geral */
   outroMoveSec: 2.6,
+} as const;
+
+/**
+ * Cartão com os números da corrida no fechamento. Fica acima dos 20% de baixo da tela,
+ * que o Reels/Stories cobrem com legenda e botões.
+ */
+export const END_CARD = {
+  /** fração da altura onde o cartão termina (embaixo) */
+  bottomFraction: 0.8,
+  /** fração da altura reservada a partir de onde o cartão pode começar; o zoom-out final enquadra o trajeto acima disso */
+  topFraction: 0.54,
+  /** segundos depois do início do fechamento */
+  appearAtSec: 0.5,
+  appearDurSec: 0.6,
+  /** tempo da contagem dos números até o valor final */
+  countDurSec: 1.3,
 } as const;
 
 /** O mapa é renderizado em CSS px e multiplicado por este fator para chegar em 1080×1920. */
@@ -53,7 +70,7 @@ export const CAMERA = {
   /** fechamento: visão geral do trajeto inteiro */
   outroPitch: 40,
   /** margem de segurança (fração da tela) ao enquadrar o trajeto inteiro */
-  outroPadding: { top: 0.16, bottom: 0.14, side: 0.1 },
+  outroPadding: { top: 0.16, bottom: 1 - END_CARD.topFraction + 0.02, side: 0.1 },
   /** desloca o ponto seguido para baixo do centro (fração da altura) — mostra mais do caminho à frente */
   followOffsetY: 0.06,
 } as const;

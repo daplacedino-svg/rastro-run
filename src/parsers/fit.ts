@@ -31,5 +31,8 @@ export async function parseFit(buffer: ArrayBuffer): Promise<RawTrack> {
   const session = messages.sessionMesgs?.[0];
   const reportedDistance = session?.totalDistance != null ? Number(session.totalDistance) : undefined;
   const sport = session?.sport != null ? String(session.sport) : undefined;
-  return { name: sport, points, reportedDistance };
+  // totalTimerTime = tempo com o cronômetro rodando (pausas automáticas e manuais fora)
+  const movingTime = session?.totalTimerTime != null ? Number(session.totalTimerTime) : undefined;
+  const elevationGain = session?.totalAscent != null ? Number(session.totalAscent) : undefined;
+  return { sport, points, reportedDistance, movingTime, elevationGain };
 }

@@ -53,9 +53,16 @@ de certificado (é autoassinado). Outra opção é usar a URL publicada no Cloud
 Tudo em `src/config.ts`: fps, bitrate, divisão abertura/corrida/fechamento, inclinação e
 zoom da câmera, cores, tamanho do bonequinho.
 
-**Duração:** cresce com a raiz da distância: `10 s + 3 s × √km`, limitada entre 12 e 35 s
-(3 km ≈ 15 s, 10 km ≈ 20 s, 21 km ≈ 24 s, 42 km ≈ 30 s). Abertura (2 s) e fechamento (4 s) são
+**Duração:** cresce com a raiz da distância: `11 s + 3 s × √km`, limitada entre 12 e 35 s
+(3 km ≈ 16 s, 10 km ≈ 20 s, 21 km ≈ 25 s, 42 km ≈ 30 s). Abertura (2 s) e fechamento (5 s) são
 fixos; só o trecho da corrida estica. Ajuste em `DURATION` no `src/config.ts`.
+
+**Cartão de dados no fechamento** (`src/overlay/end-card.ts`, `src/track/stats.ts`): nome, data,
+distância, tempo em movimento, pace médio e elevação, entrando junto com a comemoração. Fica acima
+dos 20% de baixo da tela (área que o Reels e os Stories cobrem) e o zoom-out enquadra o trajeto acima
+dele (`END_CARD` no `src/config.ts`). Tempo e elevação vêm do relógio ou do Strava quando
+disponíveis; no GPX são calculados, sem as paradas e com a altitude suavizada. Elevação 0 m não
+aparece.
 
 **Câmera:** ângulo fixo, alinhado ao eixo maior do trajeto. Ela segue o corredor sem girar. Modos que
 giravam junto com o trajeto foram testados e descartados porque o vídeo girava demais.

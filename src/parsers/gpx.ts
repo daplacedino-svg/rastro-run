@@ -36,5 +36,6 @@ export function parseGpx(text: string): RawTrack {
   const metadata = doc.getElementsByTagNameNS('*', 'metadata')[0];
   const name = (trk && childText(trk, 'name')) || (metadata && childText(metadata, 'name'));
 
-  return { name, points };
+  const type = trk && childText(trk, 'type');
+  return { name, points, sport: type };
 }

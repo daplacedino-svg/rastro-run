@@ -4,7 +4,9 @@ import { toMercator, type LngLat } from '../track/geo';
 import type { CameraPath } from '../map/camera';
 import { drawConfetti, drawCredit, drawPill, formatKm } from '../overlay/hud';
 import type { RunnerSprites } from '../overlay/runner';
+import { drawEndCard, endCardProgress } from '../overlay/end-card';
 import type { Route } from '../track/route';
+import type { RunStats } from '../track/stats';
 
 /** Junta mapa + bonequinho + km num canvas 1080×1920 (o que vai para o vídeo). */
 export class Compositor {
@@ -24,7 +26,7 @@ export class Compositor {
   }
 
   /** Desenha o quadro `i`. O mapa já precisa estar na pose desse quadro. */
-  draw(path: CameraPath, route: Route, i: number): void {
+  draw(path: CameraPath, route: Route, i: number, stats?: RunStats): void {
     const { ctx, sprites } = this;
     const pose = path.frames[i];
     const W = VIDEO.width;
@@ -32,6 +34,8 @@ export class Compositor {
 
     ctx.drawImage(this.map.getCanvas(), 0, 0, W, H);
     this.drawRoute(route, pose.runnerDist);
+    // cartão de dados fica abaixo do bonequinho e do confete
+    if (stats && pose.phase === 'outro') drawEndCard(ctx, stats, pose.phaseTime, W, H);
 
     const p = this.map.project(pose.runner);
     const x = p.x * MAP_PIXEL_RATIO;
@@ -70,7 +74,14 @@ export class Compositor {
 
     const km = formatKm((pose.runnerDist / route.length) * route.displayDistance);
     const pillGap = pose.phase === 'outro' ? 70 : 34;
-    drawPill(ctx, km, x, y - sprites.standingHeight - pillGap, pose.phase === 'outro' ? 1.25 : 1);
+    // no fechamento a etiqueta some enquanto o cartão de dados (com a distância exata) entra
+    const pillAlpha = pose.phase === 'outro' && stats ? 1 - endCardProgress(pose.phaseTime) : 1;
+    if (pillAlpha > 0.01) {
+      ctx.save();
+      ctx.globalAlpha = pillAlpha;
+      drawPill(ctx, km, x, y - sprites.standingHeight - pillGap, pose.phase === 'outro' ? 1.25 : 1);
+      ctx.restore();
+    }
 
     drawCredit(ctx, this.credit, W, H);
   }

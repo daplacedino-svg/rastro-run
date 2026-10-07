@@ -15,6 +15,7 @@ import { renderFrameExact, type Scene } from './render/scene';
 import { activityUrl } from './strava/client';
 import { initStravaPanel } from './ui/strava-panel';
 import { Route } from './track/route';
+import { computeStats, type RunStats } from './track/stats';
 import { formatDuration, formatSeconds, Stopwatch } from './ui/stopwatch';
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -65,6 +66,7 @@ let rmap: RastroMap | null = null;
 let sprites: RunnerSprites | null = null;
 let compositor: Compositor | null = null;
 let route: Route | null = null;
+let runStats: RunStats | null = null;
 let scene: Scene | null = null;
 let resultUrl: string | null = null;
 let exportAbort: AbortController | null = null;
@@ -128,6 +130,7 @@ async function loadTrack(raw: RawTrack, source: TrackSource) {
   hideError(ui.uploadError);
   hideError(ui.studioError);
   route = new Route(raw);
+  runStats = computeStats(raw, route.displayDistance);
   showStudio();
   renderTrackInfo(raw, route, source);
 
@@ -149,9 +152,9 @@ async function loadTrack(raw: RawTrack, source: TrackSource) {
 }
 
 function rebuildScene() {
-  if (!rmap || !route || !compositor) return;
+  if (!rmap || !route || !compositor || !runStats) return;
   const path = buildCameraPath(route, rmap.map);
-  scene = { rmap, route, path, compositor };
+  scene = { rmap, route, path, compositor, stats: runStats };
   preview.setScene(scene);
   if (import.meta.env.DEV) {
     const s = scene;

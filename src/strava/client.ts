@@ -18,6 +18,7 @@ export interface StravaActivity {
   startDateLocal: string;
   distance: number;
   movingTime: number;
+  elevationGain: number | null;
   polyline: string;
 }
 
@@ -60,7 +61,10 @@ export async function fetchTrack(activity: StravaActivity): Promise<RawTrack> {
   const start = Date.parse(activity.startDate);
   return {
     name: activity.name,
+    sport: activity.sportType,
     reportedDistance: activity.distance,
+    movingTime: activity.movingTime,
+    elevationGain: activity.elevationGain ?? undefined,
     points: points.map(([lat, lon, ele, t]) => ({
       lat,
       lon,

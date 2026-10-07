@@ -36,13 +36,16 @@ export function parseTcx(text: string): RawTrack {
 
   // Soma das voltas é a distância "oficial" do relógio.
   let lapsTotal = 0;
+  let lapsTime = 0;
   for (const lap of Array.from(doc.getElementsByTagNameNS('*', 'Lap'))) {
-    const direct = Array.from(lap.children).find((c) => c.localName === 'DistanceMeters');
-    const d = num(direct);
+    const direct = (name: string) => Array.from(lap.children).find((c) => c.localName === name);
+    const d = num(direct('DistanceMeters'));
     if (Number.isFinite(d)) lapsTotal += d;
+    const t = num(direct('TotalTimeSeconds'));
+    if (Number.isFinite(t)) lapsTime += t;
   }
 
   const reportedDistance = lapsTotal > 0 ? lapsTotal : Number.isFinite(lastDistance) ? lastDistance : undefined;
-  const name = first(doc.documentElement, 'Activity')?.getAttribute('Sport') ?? undefined;
-  return { name, points, reportedDistance };
+  const sport = first(doc.documentElement, 'Activity')?.getAttribute('Sport') ?? undefined;
+  return { sport, points, reportedDistance, movingTime: lapsTime > 0 ? lapsTime : undefined };
 }

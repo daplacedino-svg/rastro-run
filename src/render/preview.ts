@@ -26,7 +26,7 @@ export class Preview {
       map.on('render', () => {
         const s = this.scene;
         if (!s || s.rmap.map !== map || this.playing || this.suspended || this.drawing) return;
-        s.compositor.draw(s.path, s.route, this.frame);
+        s.compositor.draw(s.path, s.route, this.frame, s.stats);
       });
     }
     this.show(0);

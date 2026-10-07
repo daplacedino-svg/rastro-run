@@ -113,6 +113,7 @@ interface SummaryActivity {
   start_date_local: string;
   distance: number;
   moving_time: number;
+  total_elevation_gain?: number;
   map?: { summary_polyline?: string | null };
 }
 
@@ -131,6 +132,7 @@ export async function listActivities(session: Session, page: number, perPage: nu
         startDateLocal: a.start_date_local,
         distance: a.distance,
         movingTime: a.moving_time,
+        elevationGain: a.total_elevation_gain ?? null,
         polyline: a.map!.summary_polyline!,
       })),
   };

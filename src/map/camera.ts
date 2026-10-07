@@ -1,5 +1,5 @@
 import type { Map as MlMap } from 'maplibre-gl';
-import { CAMERA, MAP_CSS_HEIGHT, MAP_CSS_WIDTH, TIMELINE, VIDEO, videoDurationSec } from '../config';
+import { CAMERA, END_CARD, MAP_CSS_HEIGHT, MAP_CSS_WIDTH, TIMELINE, VIDEO, videoDurationSec } from '../config';
 import { easeInOutCubic, phaseOf, runFraction, timelineInfo, type Phase, type TimelineInfo } from '../render/timeline';
 import { angleDiff, bearing, fromMercator, metersPerMercatorUnit, toMercator, type LngLat } from '../track/geo';
 import type { Route } from '../track/route';
@@ -228,7 +228,8 @@ function fitOverview(
 
   // Na chegada ficam o bonequinho comemorando e a etiqueta de km (maior no fechamento):
   // o ponto final precisa de folga extra para eles não saírem cortados. Valores em CSS px.
-  const finishSafe = { side: 105, top: 180, bottom: 30 };
+  // embaixo, a chegada precisa ficar acima do cartão de dados (END_CARD)
+  const finishSafe = { side: 105, top: 180, bottom: MAP_CSS_HEIGHT * (1 - END_CARD.topFraction) + 20 };
   const fitsOnScreen = (b: ReturnType<typeof measure>) =>
     b.minX >= safe.left &&
     b.maxX <= safe.right &&
