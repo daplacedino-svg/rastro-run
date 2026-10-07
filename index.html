@@ -18,11 +18,14 @@
       <!-- 1. Upload -->
       <section id="step-upload" class="step">
         <h1>Sua corrida virando vídeo</h1>
-        <p class="lead">Suba o arquivo do relógio e baixe um vídeo vertical curtinho para Reels e Stories.</p>
+        <p class="lead">Conecte o Strava ou suba o arquivo do relógio e baixe um vídeo vertical curtinho para Reels e Stories.</p>
 
         <!-- Strava: aparece só quando o Worker está configurado (src/ui/strava-panel.ts) -->
         <section id="strava-box" class="strava-box" hidden>
-          <a id="strava-connect" class="strava-btn" href="/api/strava/login">Conectar com Strava</a>
+          <!-- arte oficial do Strava, sem modificação (regras: developers.strava.com/guidelines) -->
+          <a id="strava-connect" class="strava-connect" href="/api/strava/login">
+            <img src="/strava/connect-with-strava.svg" alt="Connect with Strava" width="237" height="48" />
+          </a>
           <div id="strava-connected" hidden>
             <div class="strava-head">
               <span id="strava-hello">Escolha uma atividade:</span>
@@ -32,7 +35,10 @@
             <button id="strava-more" class="ghost-btn" type="button" hidden>Carregar mais</button>
           </div>
           <p id="strava-error" class="error" role="alert" hidden></p>
-          <p class="strava-credit">Dados de atividades fornecidos pelo Strava</p>
+          <picture class="strava-powered">
+            <source srcset="/strava/powered-by-strava-white.svg" media="(prefers-color-scheme: dark)" />
+            <img src="/strava/powered-by-strava-black.svg" alt="Powered by Strava" width="158" height="16" />
+          </picture>
         </section>
         <div id="or-divider" class="divider" hidden><span>ou envie um arquivo</span></div>
 

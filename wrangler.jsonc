@@ -21,9 +21,9 @@
   "vars": {
     // Client ID do app do Strava (é público). Vazio = botão do Strava escondido.
     "STRAVA_CLIENT_ID": "285386",
-    // "true" mostra o botão para todo mundo. Antes da aprovação do Strava, deixe "false"
-    // e teste abrindo o site com ?strava-beta=1
-    "STRAVA_PUBLIC": "false"
+    // "true" mostra o botão para todo mundo (app aprovado pelo Strava para mais atletas em 2026-10-07).
+    // Com "false", só aparece abrindo o site com ?strava-beta=1
+    "STRAVA_PUBLIC": "true"
   },
   "observability": {
     "enabled": true

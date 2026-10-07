@@ -168,10 +168,11 @@ function rebuildScene() {
 }
 
 function renderTrackInfo(raw: RawTrack, r: Route, source: TrackSource) {
-  const times = raw.points.map((p) => p.time).filter((t): t is number => t != null);
+  // mesmo tempo do cartão do vídeo: em movimento (do relógio/Strava ou calculado sem as paradas)
+  const moving = runStats?.movingTime;
   const items: [string, string, boolean?][] = [
     ['Distância', formatKm(r.displayDistance)],
-    ['Tempo', times.length > 1 ? formatClock(times[times.length - 1] - times[0]) : '—'],
+    ['Tempo em movimento', moving ? formatClock(moving * 1000) : '—'],
     ['Duração do vídeo', `${Math.round(videoDurationSec(r.displayDistance))} s`],
     ['Pontos de GPS', raw.points.length.toLocaleString('pt-BR')],
   ];
@@ -190,7 +191,7 @@ function renderTrackInfo(raw: RawTrack, r: Route, source: TrackSource) {
     link.href = activityUrl(source.activityId);
     link.target = '_blank';
     link.rel = 'noopener';
-    link.textContent = 'Ver no Strava';
+    link.textContent = 'View on Strava'; // texto exigido pelas regras de marca do Strava
     ui.trackInfo.lastElementChild?.append(link);
   }
 }

@@ -93,9 +93,8 @@ direto da API, sem precisar de arquivo. O código fica em `worker/` (servidor) e
 - **Permissão pedida:** `activity:read_all`, que inclui atividades "Só você".
 - **Endpoints:** `/api/strava/status`, `/login`, `/callback`, `/activities?page=N`,
   `/activities/:id/track` e `/logout` (este revoga a autorização no Strava).
-- **Botão escondido por padrão:** só aparece com o Strava configurado **e** `STRAVA_PUBLIC=true`.
-  Antes da aprovação do app, teste abrindo o site com `?strava-beta=1`, que vale para aquele
-  navegador. `?strava-beta=0` desliga.
+- **Quando o botão aparece:** com o Strava configurado **e** `STRAVA_PUBLIC=true`. Com `false`, só aparece
+  abrindo o site com `?strava-beta=1` (vale para aquele navegador; `?strava-beta=0` desliga).
 
 ### Configuração
 
@@ -114,12 +113,19 @@ direto da API, sem precisar de arquivo. O código fica em `worker/` (servidor) e
    ```
    O Vite repassa `/api/*` para o Worker local (porta 8787).
 
-### Antes de liberar para todo mundo
+### Público e regras de marca
 
-- Trocar o botão "Conectar com Strava" pelo **botão oficial** e incluir o selo **"Powered by
-  Strava"**, conforme as regras de marca do Strava.
-- Pedir a revisão do app ao Strava. Apps novos atendem poucos atletas até serem aprovados.
-- Depois da aprovação, mudar `STRAVA_PUBLIC` para `"true"`.
+Liberado para todo mundo em 2026-10-07 (`STRAVA_PUBLIC=true`), depois que o Strava aprovou o app para
+mais atletas. As regras de marca ([developers.strava.com/guidelines](https://developers.strava.com/guidelines/))
+são seguidas assim:
+
+- **Botão "Connect with Strava"** e **selo "Powered by Strava"** usam a arte oficial, sem modificação, em
+  `public/strava/` (tirada de `1.1-Connect-with-Strava-Buttons.zip` e `1.2-Strava-API-Logos.zip`).
+  O selo tem versão preta (tema claro) e branca (tema escuro).
+- **Link para a atividade** com o texto exato **"View on Strava"**, em negrito e no laranja `#FC5200`.
+- **Sem selo dentro do vídeo**: as regras só exigem a arte oficial *se* o selo aparecer.
+- **Não fazer:** colocar "Strava" no nome do app, sugerir que o Strava patrocina ou endossa o app, alterar
+  ou animar os logos, usar parte do logo como ícone.
 
 ## Deploy no Cloudflare Workers
 

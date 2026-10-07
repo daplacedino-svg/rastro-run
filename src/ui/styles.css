@@ -472,18 +472,23 @@ h1 {
   gap: 10px;
   margin-top: 8px;
 }
-/* cor oficial da marca Strava; trocar pelo botão oficial antes da revisão do app */
-.strava-btn {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 54px;
-  border-radius: 14px;
-  background: #fc5200;
-  color: #fff;
-  font-weight: 700;
-  font-size: 17px;
-  text-decoration: none;
+.strava-connect {
+  align-self: center;
+  display: block;
+  line-height: 0;
+  border-radius: 6px;
+}
+.strava-connect img {
+  height: 48px;
+  width: auto;
+}
+.strava-powered {
+  align-self: center;
+  line-height: 0;
+}
+.strava-powered img {
+  height: 16px;
+  width: auto;
 }
 .strava-head {
   display: flex;
@@ -571,18 +576,14 @@ h1 {
   text-align: center;
   padding: 12px;
 }
-.strava-credit {
-  margin: 0;
-  font-size: 12px;
-  color: var(--muted);
-  text-align: center;
-}
+/* regra do Strava: link "View on Strava" legível, em negrito/sublinhado ou laranja #FC5200 */
 .strava-view {
   display: inline-block;
   margin-top: 4px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   color: #fc5200;
+  text-decoration: underline;
 }
 
 .divider {
