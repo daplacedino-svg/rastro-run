@@ -64,6 +64,10 @@ dele (`END_CARD` no `src/config.ts`). Tempo e elevação vêm do relógio ou do 
 disponíveis; no GPX são calculados, sem as paradas e com a altitude suavizada. Elevação 0 m não
 aparece.
 
+**Marca no vídeo:** "rodagem.run" pequeno no canto superior esquerdo durante todo o vídeo (abaixo dos
+~14% de cima que o Stories cobre; `WATERMARK` no `src/config.ts`) e "feito com rodagem.run" no rodapé do
+cartão de dados. O zoom-out final deixa livre a faixa da marca e a do cartão.
+
 **Câmera:** ângulo fixo, alinhado ao eixo maior do trajeto. Ela segue o corredor sem girar. Modos que
 giravam junto com o trajeto foram testados e descartados porque o vídeo girava demais.
 

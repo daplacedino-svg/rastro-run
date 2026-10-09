@@ -1,4 +1,4 @@
-import { STYLE } from '../config';
+import { STYLE, WATERMARK } from '../config';
 
 const kmFormat = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
@@ -45,6 +45,39 @@ export function drawCredit(ctx: CanvasRenderingContext2D, text: string, width: n
   ctx.shadowColor = 'rgba(0,0,0,0.6)';
   ctx.shadowBlur = 4;
   ctx.fillText(text, width - 24, height - 20);
+  ctx.restore();
+}
+
+/**
+ * Escreve "rodagem.run" no estilo do logo do site ("rodagem" + ".run" em laranja), com a linha
+ * de base em (x, y). Devolve a largura usada.
+ */
+export function drawBrand(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  sizePx: number,
+  ink = '#ffffff',
+): number {
+  ctx.font = `800 ${sizePx}px ${STYLE.font}`;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = ink;
+  ctx.fillText('rodagem', x, y);
+  const w = ctx.measureText('rodagem').width;
+  ctx.fillStyle = STYLE.routeColor;
+  ctx.fillText('.run', x + w, y);
+  return w + ctx.measureText('.run').width;
+}
+
+/** Marca discreta no canto superior esquerdo, abaixo da área que o Stories cobre. */
+export function drawWatermark(ctx: CanvasRenderingContext2D, height: number): void {
+  ctx.save();
+  ctx.globalAlpha = WATERMARK.opacity;
+  ctx.shadowColor = 'rgba(0,0,0,0.55)';
+  ctx.shadowBlur = 8;
+  ctx.shadowOffsetY = 2;
+  drawBrand(ctx, WATERMARK.x, height * WATERMARK.topFraction + WATERMARK.sizePx, WATERMARK.sizePx);
   ctx.restore();
 }
 

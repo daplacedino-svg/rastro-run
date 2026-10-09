@@ -41,12 +41,22 @@ export const END_CARD = {
   /** fração da altura onde o cartão termina (embaixo) */
   bottomFraction: 0.8,
   /** fração da altura reservada a partir de onde o cartão pode começar; o zoom-out final enquadra o trajeto acima disso */
-  topFraction: 0.54,
+  topFraction: 0.52,
   /** segundos depois do início do fechamento */
   appearAtSec: 0.5,
   appearDurSec: 0.6,
   /** tempo da contagem dos números até o valor final */
   countDurSec: 1.3,
+} as const;
+
+/** Marca "rodagem.run" no canto superior esquerdo, durante o vídeo todo. */
+export const WATERMARK = {
+  /** alinhada à margem do cartão de dados */
+  x: 56,
+  /** abaixo dos ~14% de cima, onde o Stories mostra as barrinhas e o nome do perfil */
+  topFraction: 0.145,
+  sizePx: 38,
+  opacity: 0.8,
 } as const;
 
 /** O mapa é renderizado em CSS px e multiplicado por este fator para chegar em 1080×1920. */
@@ -70,7 +80,8 @@ export const CAMERA = {
   /** fechamento: visão geral do trajeto inteiro */
   outroPitch: 40,
   /** margem de segurança (fração da tela) ao enquadrar o trajeto inteiro */
-  outroPadding: { top: 0.16, bottom: 1 - END_CARD.topFraction + 0.02, side: 0.1 },
+  // em cima, deixa livre a faixa da marca d'água (WATERMARK)
+  outroPadding: { top: 0.2, bottom: 1 - END_CARD.topFraction + 0.02, side: 0.1 },
   /** desloca o ponto seguido para baixo do centro (fração da altura) — mostra mais do caminho à frente */
   followOffsetY: 0.06,
 } as const;

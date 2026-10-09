@@ -2,7 +2,7 @@ import type { Map as MlMap } from 'maplibre-gl';
 import { MAP_CSS_HEIGHT, MAP_PIXEL_RATIO, STYLE, VIDEO } from '../config';
 import { toMercator, type LngLat } from '../track/geo';
 import type { CameraPath } from '../map/camera';
-import { drawConfetti, drawCredit, drawPill, formatKm } from '../overlay/hud';
+import { drawConfetti, drawCredit, drawPill, drawWatermark, formatKm } from '../overlay/hud';
 import type { RunnerSprites } from '../overlay/runner';
 import { drawEndCard, endCardProgress } from '../overlay/end-card';
 import type { Route } from '../track/route';
@@ -83,6 +83,7 @@ export class Compositor {
       ctx.restore();
     }
 
+    drawWatermark(ctx, H);
     drawCredit(ctx, this.credit, W, H);
   }
 

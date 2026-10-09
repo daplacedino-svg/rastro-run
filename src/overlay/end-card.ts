@@ -1,5 +1,6 @@
 import { END_CARD, STYLE } from '../config';
 import type { RunStats } from '../track/stats';
+import { drawBrand } from './hud';
 
 // Cartão com os números da corrida, que sobe junto com a comemoração no fechamento.
 
@@ -30,7 +31,7 @@ export function drawEndCard(ctx: CanvasRenderingContext2D, stats: RunStats, t: n
   const cols = cells.length <= 3 ? cells.length : 2;
   const rows = Math.ceil(cells.length / cols);
 
-  const pad = 48;
+  const pad = 42;
   const titleSize = 50;
   const dateSize = 30;
   const labelSize = 25;
@@ -39,8 +40,11 @@ export function drawEndCard(ctx: CanvasRenderingContext2D, stats: RunStats, t: n
   const rowGap = 34;
   const hasDate = stats.startTime != null;
   const headerH = titleSize + (hasDate ? 14 + dateSize : 0);
+  const headerGap = 32;
+  const footerSize = 28;
+  const footerGap = 30;
   const cardW = W - 2 * 56;
-  const cardH = pad + headerH + 40 + rows * rowH + (rows - 1) * rowGap + pad;
+  const cardH = pad + headerH + headerGap + rows * rowH + (rows - 1) * rowGap + footerGap + footerSize + pad;
   const x = (W - cardW) / 2;
   const bottom = H * END_CARD.bottomFraction;
   const y = bottom - cardH + (1 - enter) * 70;
@@ -77,7 +81,7 @@ export function drawEndCard(ctx: CanvasRenderingContext2D, stats: RunStats, t: n
     ctx.fillText(capitalize(dateFormat.format(stats.startTime!)), x + pad + 30, cy);
     cy += dateSize;
   }
-  cy += 40;
+  cy += headerGap;
 
   // números
   const colW = (cardW - 2 * pad) / cols;
@@ -99,6 +103,15 @@ export function drawEndCard(ctx: CanvasRenderingContext2D, stats: RunStats, t: n
       ctx.textBaseline = 'top';
     }
   });
+
+  // rodapé: "feito com rodagem.run"
+  const footY = cy + rows * rowH + (rows - 1) * rowGap + footerGap + footerSize;
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = 'rgba(255,255,255,0.55)';
+  ctx.font = `600 ${footerSize}px ${STYLE.font}`;
+  const prefix = 'feito com ';
+  ctx.fillText(prefix, x + pad, footY);
+  drawBrand(ctx, x + pad + ctx.measureText(prefix).width, footY, footerSize);
 
   ctx.restore();
 }

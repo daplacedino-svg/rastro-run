@@ -229,7 +229,8 @@ function fitOverview(
   // Na chegada ficam o bonequinho comemorando e a etiqueta de km (maior no fechamento):
   // o ponto final precisa de folga extra para eles não saírem cortados. Valores em CSS px.
   // embaixo, a chegada precisa ficar acima do cartão de dados (END_CARD)
-  const finishSafe = { side: 105, top: 180, bottom: MAP_CSS_HEIGHT * (1 - END_CARD.topFraction) + 20 };
+  // em cima, o bonequinho não pode ficar sob a marca d'água; embaixo, precisa ficar acima do cartão (END_CARD)
+  const finishSafe = { side: 105, top: 250, bottom: MAP_CSS_HEIGHT * (1 - END_CARD.topFraction) + 20 };
   const fitsOnScreen = (b: ReturnType<typeof measure>) =>
     b.minX >= safe.left &&
     b.maxX <= safe.right &&
